@@ -4,3 +4,4 @@ output/
 crawler/__pycache__/
 keyword_extractor/__pycache__/
 search_engine/__pycache__/
+Dockerfile

@@ -1,6 +1,5 @@
 from pathlib import Path
 from rake_nltk import Rake
-from gensim.summarization import keywords
 import re
 
 
