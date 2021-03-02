@@ -2,3 +2,4 @@
 venv/
 output/
 crawler/__pycache__/
+keyword_extractor/__pycache__/

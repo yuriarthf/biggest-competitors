@@ -2,7 +2,7 @@ import requests
 import re
 from pathlib import Path
 from .custom_exceptions import BadReturnCode, InvalidArgument
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 
 class Spider:
@@ -38,23 +38,44 @@ class Spider:
         return f'{sep}'.join(urn)
 
     def save_html_to_folder(self, url, html, rel_output_folder='output'):
-        full_output_folder = Path(rel_output_folder) / self.get_website_name(url)
+        company_name = self.get_website_name(url)
+        full_output_folder = Path(rel_output_folder) / company_name
         full_output_folder.mkdir(parents=True, exist_ok=True)
         full_output_path = full_output_folder / (self.get_urn(url, sep='.') + '.html')
         with open(full_output_path, 'w') as html_file:
             html_file.writelines(str(html.prettify()))
-        return full_output_folder
+        return company_name, full_output_folder
 
-    def save_text_content_to_folder(self, url, html, blacklist_elem, rel_output_folder='output'):
-        full_output_folder = Path(rel_output_folder) / self.get_website_name(url)
+    def save_text_content_to_folder(self, url, html, blacklist_elem, rel_output_folder='output', filter_non_ascii=True):
+        company_name = self.get_website_name(url)
+        full_output_folder = Path(rel_output_folder) / company_name
         full_output_folder.mkdir(parents=True, exist_ok=True)
         full_output_path = full_output_folder / (self.get_urn(url, sep='.') + '.txt')
+        self._remove_all_comment_tags(html)
         all_text = [t.strip(' ') for t in html.find_all(text=True)
                     if t.parent.name not in blacklist_elem]
+        all_text = filter(lambda x: x != '' and x != 'html', map(self.remove_trailing_leading_spaces, all_text))
+        if filter_non_ascii:
+            all_text = map(self.filter_non_ascii, all_text)
         with open(full_output_path, 'w') as txt_file:
-            txt_file.writelines('\n'.join(all_text))
-        return full_output_folder
+            txt_file.write('\n'.join(all_text))
+        return company_name, full_output_folder
 
+    @staticmethod
+    def _remove_all_comment_tags(soup):
+        comments = soup.find_all(text=lambda x: isinstance(x, Comment))
+        [comment.extract() for comment in comments]
+
+    @staticmethod
+    def filter_non_ascii(text):
+        text = text.encode('ascii', 'ignore').decode()
+        return text
+
+    @staticmethod
+    def remove_trailing_leading_spaces(text):
+        pattern = r'(^[\n\t\r\s]*|[\n\t\r\s]*$)'
+        text = re.sub(pattern, '', text)
+        return text
 
     @staticmethod
     def _add_www_if_necessary(website):
