@@ -20,10 +20,11 @@ class Competitors(Resource):
                 kw_extractor = Keyword_Extractor(f)
                 queries.extend(kw_extractor.extract_keywords(remove_word=company_name))
         search_instance = SearchQueryList(queries)
-        most_common_website = search_instance.get_top_n_pages(remove_pages_with_word=company_name)
+        most_common_websites = search_instance.get_top_n_pages(remove_pages_with_word=company_name)
+        most_common_websites = list(map(lambda elem: elem[0], most_common_websites))
         return jsonify({
             'status': 200,
-            'top_competitors': most_common_website
+            'top_competitors': most_common_websites
         })
 
 

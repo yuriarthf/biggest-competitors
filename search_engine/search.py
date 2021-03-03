@@ -37,7 +37,6 @@ class SearchPages:
         if not urn:
             return 'index'
         urn = f'{sep}'.join(urn)
-        print(urn)
         return urn
 
     def remove_urn(self, website):
@@ -57,7 +56,7 @@ class SearchPages:
         res = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
         return res['items']
 
-    def get_top_n_pages(self, num_pages=4, standardize_website=True):
+    def get_top_n_pages(self, num_pages=20, standardize_website=True):
         search_results = map(lambda res: res['link'], self.google_search(self.query, API_KEY, CSE_ID, num=num_pages))
         if standardize_website:
             search_results = map(self.standardize_website, search_results)
@@ -69,13 +68,13 @@ class SearchQueryList:
         self.query_list = query_list
         self.pages_per_query = pages_per_query
 
-    def get_top_n_pages(self, top_n_pages=5, remove_pages_with_word=None):
+    def get_top_n_pages(self, top_n_pages=10, remove_pages_with_word=None):
         url_counter = Counter()
         for query in self.query_list:
             search_results = SearchPages(query) \
                 .get_top_n_pages(self.pages_per_query)
             if remove_pages_with_word:
                 search_results = filter(lambda url: remove_pages_with_word not in url, search_results)
-            print(list(search_results))
             url_counter.update(search_results)
-        return url_counter.most_common(top_n_pages)
+        n_most_common_websites = url_counter.most_common(top_n_pages)
+        return n_most_common_websites

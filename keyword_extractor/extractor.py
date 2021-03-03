@@ -17,7 +17,7 @@ class Keyword_Extractor:
             self._file = None
         self.keyword_extractor = Rake()
 
-    def extract_keywords(self, top_n=10, remove_word=None):
+    def extract_keywords(self, top_n=20, remove_word=None):
         if self._file and not self._text:
             all_text = self._fetch_text_from_file(self._file)
         else:
