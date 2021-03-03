@@ -54,7 +54,11 @@ class SearchPages:
     def google_search(search_term, api_key, cse_id, **kwargs):
         service = build("customsearch", "v1", developerKey=api_key)
         res = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
-        return res['items']
+        try:
+            items = res['items']
+        except KeyError:
+            items = []
+        return items
 
     def get_top_n_pages(self, num_pages=20, standardize_website=True):
         search_results = map(lambda res: res['link'], self.google_search(self.query, API_KEY, CSE_ID, num=num_pages))
