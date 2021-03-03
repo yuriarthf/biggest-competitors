@@ -3,6 +3,7 @@ from flask_restful import Api, Resource
 from crawler.spider import Spider
 from keyword_extractor.extractor import Keyword_Extractor
 from search_engine.search import SearchQueryList
+from crawler.custom_exceptions import BadReturnCode
 
 app = Flask(__name__)
 api = Api(app)
@@ -13,7 +14,13 @@ class Competitors(Resource):
         posted_data = request.get_json()
         initial_url = posted_data['company_url']
         spider = Spider(initial_url)
-        company_name, path_fo_folder = spider.recursive_get_html()
+        try:
+            company_name, path_fo_folder = spider.recursive_get_html()
+        except BadReturnCode as e:
+            return jsonify(({
+                'status': e.status_code,
+                'message': e.message
+            }))
         queries = list()
         for f in path_fo_folder.iterdir():
             if f.is_file() and f.suffix == '.txt':
