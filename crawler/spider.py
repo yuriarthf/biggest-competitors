@@ -86,7 +86,7 @@ class Spider:
 
     def _replace_http_for_https(self, website, add_www=True):
         https_website = website.replace('http', 'https')
-        if https_website[-1] != '/':
+        if not https_website.endswith('/'):
             https_website += '/'
         if add_www:
             https_website = self._add_www_if_necessary(https_website)
@@ -94,7 +94,7 @@ class Spider:
 
     def _replace_https_for_http(self, website, add_www=True):
         http_website = website.replace('https', 'http')
-        if http_website[-1] != '/':
+        if not http_website.endswith('/'):
             http_website += '/'
         if add_www:
             http_website = self._add_www_if_necessary(http_website)
