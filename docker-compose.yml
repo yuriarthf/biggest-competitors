@@ -6,4 +6,8 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - "output/:output/"
+      - "output:/usr/src/app/output/"
+
+volumes:
+  output:
+    driver: local
