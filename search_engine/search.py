@@ -83,5 +83,4 @@ class SearchQueryList:
                 search_results = filter(lambda url: remove_pages_with_word not in url, search_results)
             url_counter.update(search_results)
         n_most_common_websites = url_counter.most_common(top_n_pages)
-        print(n_most_common_websites)
         return n_most_common_websites
