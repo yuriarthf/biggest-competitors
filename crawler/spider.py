@@ -37,29 +37,28 @@ class Spider:
             return 'index'
         return f'{sep}'.join(urn)
 
-    def save_html_to_folder(self, url, html, rel_output_folder='output'):
+    def get_output_path_and_folder(self, url, rel_output_folder='output'):
         company_name = self.get_website_name(url)
         full_output_folder = Path(rel_output_folder) / company_name
         full_output_folder.mkdir(parents=True, exist_ok=True)
-        full_output_path = full_output_folder / (self.get_urn(url, sep='.') + '.html')
-        with open(full_output_path, 'w') as html_file:
-            html_file.writelines(str(html.prettify()))
-        return company_name, full_output_folder
+        full_output_path_html = full_output_folder / (self.get_urn(url, sep='.') + '.html')
+        full_output_path_txt = full_output_folder / (self.get_urn(url, sep='.') + '.txt')
+        return full_output_path_html, full_output_path_txt, full_output_folder, company_name
 
-    def save_text_content_to_folder(self, url, html, blacklist_elem, rel_output_folder='output', filter_non_ascii=True):
-        company_name = self.get_website_name(url)
-        full_output_folder = Path(rel_output_folder) / company_name
-        full_output_folder.mkdir(parents=True, exist_ok=True)
-        full_output_path = full_output_folder / (self.get_urn(url, sep='.') + '.txt')
+    @staticmethod
+    def save_html_to_folder(html, full_output_path_html):
+        with open(full_output_path_html, 'w') as html_file:
+            html_file.writelines(str(html.prettify()))
+
+    def save_text_content_to_folder(self, html, blacklist_elem, full_output_path_txt, filter_non_ascii=True):
         self._remove_all_comment_tags(html)
         all_text = [t.strip(' ') for t in html.find_all(text=True)
                     if t.parent.name not in blacklist_elem]
         all_text = filter(lambda x: x != '' and x != 'html', map(self.remove_trailing_leading_spaces, all_text))
         if filter_non_ascii:
             all_text = map(self.filter_non_ascii, all_text)
-        with open(full_output_path, 'w') as txt_file:
+        with open(full_output_path_txt, 'w') as txt_file:
             txt_file.write('\n'.join(all_text))
-        return company_name, full_output_folder
 
     @staticmethod
     def _remove_all_comment_tags(soup):
@@ -128,10 +127,16 @@ class Spider:
         for i in range(recursive_urls):
             new_urls = list()
             for url in urls:
+                full_output_path_html, full_output_path_txt, full_output_folder, company_name = (
+                    self.get_output_path_and_folder(url, rel_output_folder='output'))
+                if full_output_path_html.is_file() and full_output_path_html.is_file():
+                    continue
                 html = self.get_url(url)
-                company_name, path_to_folder = self.save_html_to_folder(url, html)
-                if save_text:
-                    _ = self.save_text_content_to_folder(url, html, ['script', 'style'])
+                if full_output_path_html.is_file():
+                    continue
+                self.save_html_to_folder(html, full_output_path_html)
+                if save_text and not full_output_path_txt.is_file():
+                    self.save_text_content_to_folder(html, ['script', 'style'], full_output_path_txt)
                 if i < recursive_urls - 1:
                     new_urls.extend(self._get_href_from_anchors(url, html))
             urls = list(set(new_urls))
