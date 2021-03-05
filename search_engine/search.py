@@ -1,4 +1,5 @@
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from collections import Counter
 import re
 
@@ -61,9 +62,11 @@ class SearchPages:
         return items
 
     def get_top_n_pages(self, num_pages=20, standardize_website=True):
-        search_results = map(lambda res: res['link'], self.google_search(self.query,
-                                                                         API_KEY, CSE_ID,
-                                                                         num=num_pages))
+        try:
+            search_results = self.google_search(self.query, API_KEY, CSE_ID, num=num_pages)
+        except HttpError:
+            return list()
+        search_results = map(lambda res: res['link'], search_results)
         if standardize_website:
             search_results = map(self.standardize_website, search_results)
         return list(search_results)

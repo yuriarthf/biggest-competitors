@@ -11,7 +11,7 @@ api = Api(app)
 
 class Competitors(Resource):
     def post(self):
-        posted_data = request.get_json()
+        posted_data = request.form
         initial_url = posted_data['company_url']
         spider = Spider(initial_url)
         try:
