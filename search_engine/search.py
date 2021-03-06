@@ -20,7 +20,7 @@ class SearchPages:
 
     def _replace_https_for_http(self, website, add_www=True):
         http_website = website.replace('https', 'http')
-        if http_website[-1] != '/':
+        if not http_website.endswith('/'):
             http_website += '/'
         if add_www:
             http_website = self._add_www_if_necessary(http_website)
