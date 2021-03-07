@@ -9,23 +9,37 @@ app = Flask(__name__)
 api = Api(app)
 
 
+def clean_list_from_elem(list_, elem_):
+    while True:
+        try:
+            list_.remove(elem_)
+        except ValueError:
+            break
+
+
+def get_queries_from_folder(path_to_folder):
+    queries = list()
+    for f in path_to_folder.iterdir():
+        if f.is_file() and f.suffix == '.html':
+            kw_extractor = Keyword_Extractor(f)
+            queries.extend(map(lambda kw: ' '.join(kw), kw_extractor.extract_top_keywords().values()))
+    clean_list_from_elem(queries, '')
+    return queries
+
+
 class Competitors(Resource):
     def post(self):
         posted_data = request.form
         initial_url = posted_data['company_url']
         spider = Spider(initial_url)
         try:
-            company_name, path_fo_folder = spider.recursive_get_html()
+            company_name, path_to_folder = spider.recursive_get_html()
         except BadReturnCode as e:
             return jsonify(({
                 'status': e.status_code,
                 'message': e.message
             }))
-        queries = list()
-        for f in path_fo_folder.iterdir():
-            if f.is_file() and f.suffix == '.txt':
-                kw_extractor = Keyword_Extractor(f)
-                queries.extend(kw_extractor.extract_keywords(remove_word=company_name))
+        queries = get_queries_from_folder(path_to_folder)
         search_instance = SearchQueryList(queries)
         most_common_websites = search_instance.get_top_n_pages(remove_pages_with_word=company_name)
         most_common_websites = list(map(lambda elem: elem[0], most_common_websites))

@@ -119,7 +119,7 @@ class Spider:
             normalized_refs = filter(lambda x: normalized_url in x, normalized_refs)
         return list(normalized_refs)
 
-    def recursive_get_html(self, recursive_urls=2, initial_url=None, save_text=True):
+    def recursive_get_html(self, recursive_urls=2, initial_url=None, save_text=False):
         if initial_url is None:
             initial_url = self.initial_url
         urls = [initial_url]
