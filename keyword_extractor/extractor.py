@@ -1,5 +1,4 @@
 from pathlib import Path
-from rake_nltk import Rake
 from bs4 import BeautifulSoup
 from gensim.summarization import keywords
 import re
@@ -17,7 +16,6 @@ class Keyword_Extractor:
         else:
             self._text = file_or_text
             self._file = None
-        self.keyword_extractor = Rake()
 
     def _load_html_text_from_file(self):
         with open(self._file, 'r') as html_file:
@@ -25,8 +23,9 @@ class Keyword_Extractor:
         return html_text
 
     @staticmethod
-    def extract_keywords_from_text(text, number_of_keywords=10):
+    def extract_keywords_from_text(text, number_of_keywords=5, exclude_elem=None):
         keyword_set = set(keywords(text, words=number_of_keywords, split=True))
+        keyword_set.discard(exclude_elem)
         return keyword_set
 
     @staticmethod
@@ -43,22 +42,23 @@ class Keyword_Extractor:
             meta = ''
         return meta
 
-    def _get_heading_tags(self, soup):
+    def _get_heading_tags(self, soup, max_heading_level=1):
         heading_text = list()
-        for i in range(1, 7):
+        for i in range(1, max_heading_level+1):
             try:
                 heading_text.append(self._clean_text(soup.find(f'h{i}').text))
             except AttributeError:
                 pass
         return heading_text
 
-    def _get_keywords_from_headings(self, heading_list):
+    def _get_keywords_from_headings(self, heading_list, exclude_keyword=None):
         heading_keywords = set()
         for heading in heading_list:
             heading_keywords.update(self.extract_keywords_from_text(heading))
+        heading_keywords.discard(exclude_keyword)
         return heading_keywords
 
-    def extract_top_keywords(self):
+    def extract_top_keywords(self, exclude_keyword=None):
         if self._file:
             html_text = self._load_html_text_from_file()
         else:
@@ -67,11 +67,13 @@ class Keyword_Extractor:
         title = self._clean_text(soup.find('title').text)
         description = self._get_meta_with_name(soup, 'description')
         keywords_meta = self._get_meta_with_name(soup, 'keywords')
-        heading_text = self._get_heading_tags(soup)
+        # heading_text = self._get_heading_tags(soup)
+        keywords_meta = set(keywords_meta.split(','))
+        keywords_meta.discard(exclude_keyword)
         keyword_dict = {
-            'title': self.extract_keywords_from_text(title),
-            'description': self.extract_keywords_from_text(description),
-            'keywords_meta': keywords_meta.split(','),
-            'heading_text': self._get_keywords_from_headings(heading_text)
+            'title': self.extract_keywords_from_text(title, exclude_elem=exclude_keyword),
+            'description': self.extract_keywords_from_text(description, exclude_elem=exclude_keyword),
+            'keywords_meta': keywords_meta,
+            # 'heading_text': self._get_keywords_from_headings(heading_text, exclude_keyword=exclude_keyword)
         }
         return keyword_dict

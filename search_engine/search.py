@@ -61,9 +61,13 @@ class SearchPages:
             items = []
         return items
 
-    def get_top_n_pages(self, num_pages=20, standardize_website=True):
+    def get_top_n_pages(self, num_pages=20, standardize_website=True, country=None):
         try:
-            search_results = self.google_search(self.query, API_KEY, CSE_ID, num=num_pages)
+            if country:
+                search_results = self.google_search(self.query, API_KEY, CSE_ID,
+                                                    num=num_pages, gl=country.upper())
+            else:
+                search_results = self.google_search(self.query, API_KEY, CSE_ID, num=num_pages)
         except HttpError:
             return list()
         search_results = map(lambda res: res['link'], search_results)
@@ -77,11 +81,11 @@ class SearchQueryList:
         self.query_list = query_list
         self.pages_per_query = pages_per_query
 
-    def get_top_n_pages(self, top_n_pages=10, remove_pages_with_word=None):
+    def get_top_n_pages(self, top_n_pages=10, remove_pages_with_word=None, country=None):
         url_counter = Counter()
         for query in self.query_list:
             search_results = SearchPages(query) \
-                .get_top_n_pages(self.pages_per_query)
+                .get_top_n_pages(self.pages_per_query, country=country)
             if remove_pages_with_word:
                 search_results = filter(lambda url: remove_pages_with_word not in url, search_results)
             url_counter.update(search_results)

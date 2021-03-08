@@ -6,4 +6,4 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - "./output:/usr/src/app/output/"
+      - ./output:/usr/src/app/output/

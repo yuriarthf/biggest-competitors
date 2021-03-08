@@ -123,7 +123,7 @@ class Spider:
         if initial_url is None:
             initial_url = self.initial_url
         urls = [initial_url]
-        company_name, path_to_folder = None, None
+        company_name, full_output_folder = None, None
         for i in range(recursive_urls):
             new_urls = list()
             for url in urls:
@@ -140,4 +140,4 @@ class Spider:
                 if i < recursive_urls - 1:
                     new_urls.extend(self._get_href_from_anchors(url, html))
             urls = list(set(new_urls))
-        return company_name, path_to_folder
+        return company_name, full_output_folder
