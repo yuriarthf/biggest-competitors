@@ -23,7 +23,7 @@ class Keyword_Extractor:
         return html_text
 
     @staticmethod
-    def extract_keywords_from_text(text, number_of_keywords=5, exclude_elem=None):
+    def extract_keywords_from_text(text, number_of_keywords=10, exclude_elem=None):
         keyword_set = set(keywords(text, words=number_of_keywords, split=True))
         keyword_set.discard(exclude_elem)
         return keyword_set

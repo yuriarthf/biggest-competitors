@@ -7,7 +7,6 @@ from crawler.custom_exceptions import BadReturnCode
 from geolite2 import geolite2
 import re
 import socket
-import sys
 
 app = Flask(__name__)
 api = Api(app)

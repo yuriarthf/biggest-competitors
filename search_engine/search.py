@@ -46,8 +46,8 @@ class SearchPages:
         url = re.sub(pattern, '', website.replace(urn, ''))
         return url
 
-    def standardize_website(self, website):
-        standardized_website = self._replace_https_for_http(website)
+    def standardize_website(self, website, add_www=False):
+        standardized_website = self._replace_https_for_http(website, add_www=add_www)
         standardized_website = self.remove_urn(standardized_website)
         return standardized_website
 
@@ -61,7 +61,7 @@ class SearchPages:
             items = []
         return items
 
-    def get_top_n_pages(self, num_pages=20, standardize_website=True, country=None):
+    def get_top_n_pages(self, num_pages=10, standardize_website=True, country=None):
         try:
             if country:
                 search_results = self.google_search(self.query, API_KEY, CSE_ID,
